@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT 患者报告</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">患者数据详细报告</h1>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">报告内容</h5>
+                <p id="reportContent" class="card-text">
+                    正在生成报告，请稍候...
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 向后端发送请求以获取患者报告
+            fetch('/chatgpt_report')
+                .then(response => response.json())
+                .then(data => {
+                    const reportContent = document.getElementById('reportContent');
+                    if (data.error) {
+                        // 如果有错误信息，显示错误内容
+                        reportContent.innerText = `错误：${data.error}`;
+                    } else {
+                        // 显示报告内容
+                        const detailedAnalysis = data.report.detailed_analysis;
+                        if (typeof detailedAnalysis === 'object') {
+                            // 确保 detailedAnalysis 是一个对象，取出其中的内容
+                            const content = detailedAnalysis.content;
+                            reportContent.innerText = content;
+                        } else {
+                            // 如果 content 已经是字符串
+                            reportContent.innerText = detailedAnalysis;
+                        }
+                    }
+                })
+                .catch(error => {
+                    // 显示请求错误
+                    document.getElementById('reportContent').innerText = `请求错误：${error}`;
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+</body>
+</html>
+

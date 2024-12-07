@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CSV Column Distribution Plot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/nouislider@15.5.0/dist/nouislider.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Unbounded', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #4CAF50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        .sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: #45a049;
+        }
+        .content {
+            flex: 1;
+            padding: 50px;
+            overflow-y: auto;
+        }
+        .container {
+            margin-top: 20px;
+            max-width: 900px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #4CAF50;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+        .outliers {
+            margin-top: 30px;
+        }
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .slider-label {
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 5px;
+            width: 20%;
+            display: inline-block;
+            vertical-align: middle;
+            text-align: right;
+            margin-right: 10px;
+        }
+        .slider {
+            display: inline-block;
+            width: 40%;
+            vertical-align: middle;
+        }
+        .input-min-max {
+            width: 15%;
+            margin-left: 5px;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .graph-container {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div>
+            <h2 class="text-center">Patient Matching</h2>
+            <a href="/top3">Top 3 Matches</a>
+            <a href="/range">Range Matches</a>
+            <a href="/kmeans_results">K-Means Clustering</a>
+            <a href="/plot">Distribution Plot</a>
+        </div>
+        <footer>© 2048 Patient Matching System | Design by Tooplate</footer>
+    </div>
+    <div class="content">
+        <div class="container">
+            <h1 class="text-center">CSV Column Distribution Plot</h1>
+            <form method="POST" action="/plot">
+                <div class="mb-3">
+                    <label for="file_path" class="form-label">CSV File Path</label>
+                    <input type="text" class="form-control" id="file_path" name="file_path" value="1234.csv" required>
+                </div>
+                <div class="mb-3">
+                    <label for="column_name" class="form-label">Select Output Compound</label>
+                    <select class="form-select" id="column_name" name="column_name" required>
+                        <option value="" disabled selected>Select a compound</option>
+                        {% for compound in compound_names %}
+                        <option value="{{ compound }}">{{ compound }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="user_value" class="form-label">输入一个浮点数:</label>
+                    <input type="text" class="form-control" id="user_value" name="user_value">
+                </div>
+                <div id="compound-sliders"></div>
+                <button type="submit" class="btn btn-primary w-100">Generate Plot</button>
+            </form>
+            {% if user_value_difference is not none%}
+            <div>
+               {% if user_value_difference > 0 %}
+               <p>输入的值高于 MPV 的 {{ user_value_difference | abs }}%</p>
+               {% elif user_value_difference < 0 %}
+               <p>输入的值低于 MPV 的 {{ user_value_difference | abs }}%</p>
+               {% else %}
+               <p>输入的值与 MPV 相等。</p>
+               {% endif %}
+            </div>
+            {% endif %}
+            {% if graph_json_original and graph_json_transformed %}
+            <div class="graph-container">
+                <h2 class="text-center">原始数据分布图</h2>
+                <div id="graph-original"></div>
+                <h2 class="text-center mt-5">Box-Cox修正：加入红色高斯分布拟合线的数据分布图</h2>
+                <div id="graph-transformed"></div>
+            </div>
+            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+            <script>
+                // Original data graph
+                var graphJSONOriginal = {{ graph_json_original | safe }};
+                Plotly.newPlot('graph-original', graphJSONOriginal.data, graphJSONOriginal.layout);
+
+                // Box-Cox transformed data graph
+                var graphJSONTransformed = {{ graph_json_transformed | safe }};
+                Plotly.newPlot('graph-transformed', graphJSONTransformed.data, graphJSONTransformed.layout);
+            </script>
+            <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+            </script>
+            <div id="box-cox-formula" style="margin: 20px 0;">
+                <h3>Box-Cox Transformation Formula</h3>
+                 <p>
+                     $$ y(\lambda) = 
+                     \begin{cases} 
+                     \frac{y^\lambda - 1}{\lambda}, & \text{if } \lambda \neq 0 \\
+                     \ln(y), & \text{if } \lambda = 0
+                     \end{cases} $$
+                 </p>
+             </div>
+            {% endif %}
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/nouislider@15.5.0/dist/nouislider.min.js"></script>
+    <script>
+        const compounds = {{ compound_names | tojson | safe }};
+        const compoundSliders = document.getElementById('compound-sliders');
+        compounds.forEach(compound => {
+            const sliderContainer = document.createElement('div');
+            sliderContainer.className = 'slider-container';
+            const label = document.createElement('label');
+            label.className = 'slider-label';
+            label.textContent = compound;
+            const sliderElement = document.createElement('div');
+            sliderElement.className = 'slider';
+            const inputMin = document.createElement('input');
+            inputMin.type = 'text';
+            inputMin.className = 'input-min-max';
+            inputMin.name = `${compound}_min`;
+            const inputMax = document.createElement('input');
+            inputMax.type = 'text';
+            inputMax.className = 'input-min-max';
+            inputMax.name = `${compound}_max`;
+            sliderContainer.appendChild(label);
+            sliderContainer.appendChild(sliderElement);
+            sliderContainer.appendChild(inputMin);
+            sliderContainer.appendChild(inputMax);
+            compoundSliders.appendChild(sliderContainer);
+
+            noUiSlider.create(sliderElement, {
+                start: [0, 6000],
+                connect: true,
+                range: {
+                    'min': 0,
+                    'max': 6000
+                },
+                step: 0.01,
+                tooltips: [true, true]
+            });
+
+            sliderElement.noUiSlider.on('update', function (values, handle) {
+                if (handle === 0) {
+                    inputMin.value = values[0];
+                } else {
+                    inputMax.value = values[1];
+                }
+            });
+
+            inputMin.addEventListener('change', function () {
+                sliderElement.noUiSlider.set([this.value, null]);
+            });
+
+            inputMax.addEventListener('change', function () {
+                sliderElement.noUiSlider.set([null, this.value]);
+            });
+        });
+    </script>
+</body>
+</html>
+

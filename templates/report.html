@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Data Report</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Patient Data Analysis Report</h1>
+
+        <h3>Summary</h3>
+        <p><strong>Number of Outliers:</strong> {{ outlier_count }}</p>
+        <p><strong>Similarity Percentage with Closest Patient:</strong> {{ similarity_percentage }}%</p>
+
+<p><strong>家齐您好，与您的结果相似度为</strong> 
+    95%: {{ similar_people_above_95 }} 人,
+    90%: {{ similar_people_above_90 }} 人,
+    80%: {{ similar_people_above_80 }} 人,
+    70%: {{ similar_people_above_70 }} 人,
+    60%: {{ similar_people_above_60 }} 人,
+    50%: {{ similar_people_above_50 }} 人,
+    40%: {{ similar_people_above_40 }} 人,
+    30%: {{ similar_people_above_30 }} 人,
+    20%: {{ similar_people_above_20 }} 人,
+    10%: {{ similar_people_above_10 }} 人。
+</p>
+
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse; /* 边框合并为一条线 */
+    }
+    th, td {
+        border: 1px solid #ccc; /* 设置边框颜色为灰色 */
+        padding: 10px;
+        text-align: center;
+    }
+    th {
+        background-color: #f2f2f2; /* 列标题背景色 */
+    }
+    tbody tr:nth-child(odd) {
+        background-color: #f9f9f9; /* 为奇数行设置背景色 */
+    }
+    tbody tr:nth-child(even) {
+        background-color: #e9e9e9; /* 为偶数行设置背景色 */
+    }
+    .highlight {
+        background-color: #ffcc00; /* 高亮显示的单元格背景色 */
+        font-weight: bold;
+    }
+</style>
+<table>
+    <thead>
+        <tr>
+            <th>95%</th>
+            <th>90%</th>
+            <th>80%</th>
+            <th>70%</th>
+            <th>60%</th>
+            <th>50%</th>
+            <th>40%</th>
+            <th>30%</th>
+            <th>20%</th>
+            <th>10%</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ similar_people_above_95 }}</td>
+            <td>{{ similar_people_above_90 }}</td>
+            <td>{{ similar_people_above_80 }}</td>
+            <td>{{ similar_people_above_70 }}</td>
+            <td>{{ similar_people_above_60 }}</td>
+            <td>{{ similar_people_above_50 }}</td>
+            <td>{{ similar_people_above_40 }}</td>
+            <td>{{ similar_people_above_30 }}</td>
+            <td>{{ similar_people_above_20 }}</td>
+            <td>{{ similar_people_above_10 }}</td>
+        </tr>
+    </tbody>
+</table>
+
+
+
+        
+        <h3>Outliers</h3>
+        {% if outliers %}
+            <ul>
+                {% for outlier in outliers %}
+                    <li><strong>{{ outlier.compound_name }}</strong>: {{ outlier.value }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No outliers detected.</p>
+        {% endif %}
+
+        <h3>Distances from Crowding Values</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Compound Name</th>
+                    <th>Crowding Value</th>
+                    <th>Max Value</th>
+                    <th>Patient Value</th>
+                    <th>Status</th>
+                    <th>Percentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in range(distances|length) %}
+                    <tr>
+                        <td>{{ compound_names[i] }}</td>
+                        <td>{{ crowding_values[i] }}</td>
+                        <td>{{ max_values[i] }}</td>
+                        <td>{{ patient_data[i] }}</td>
+                        <td>{{ distances[i]['status'] if distances[i] is not none else 'N/A' }}</td>
+                        <td>{{ distances[i]['percentage'] if distances[i] is not none else 'N/A' }}%</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+<h3>来自MPV的距离</h3>
+{% for i in range(distances|length) %}
+    <p>您的{{ compound_names[i] }}值为{{ patient_data[i] }},该值对应的MPV是{{ crowding_values[i] }}    根据统计，数据库中该指标的最大值是{{ max_values[i] }}       您的值{{ distances[i]['status'] if distances[i] is not none else 'N/A' }}MPV{{ distances[i]['percentage'] if distances[i] is not none else 'N/A' }}%</p>
+{% endfor %}
+
+        <h3>Most Similar Patient Data</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Compound Name</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for compound, value in most_similar_patient.items() %}
+                    <tr>
+                        <td>{{ compound }}</td>
+                        <td>{{ value }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- 添加跳转按钮 -->
+        <div class="text-center mt-4">
+            <a href="/chatgpt_report" class="btn btn-primary">View ChatGPT Generated Report</a>
+        </div>
+    </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

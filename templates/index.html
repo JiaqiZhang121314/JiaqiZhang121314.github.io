@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Patient Matching System</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        /* 全局 body 样式，背景颜色为浅绿色 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Unbounded', sans-serif;
+            height: 100vh;
+            background: linear-gradient(to bottom right, #e0f7e9, #d3f3da);  /* 浅绿色渐变 */
+            display: flex;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 250px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #45a049;
+        }
+
+        /* 内容区域样式 */
+        .content {
+            flex: 1;
+            padding: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .content-box {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+        }
+
+        h1 {
+            font-size: 48px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            margin-top: 30px;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div>
+            <h2 class="text-center">Patient Matching</h2>
+            <a href="/top3"><i class="bi bi-trophy"></i> Top 3 Matches</a>
+            <a href="/range"><i class="bi bi-list-ol"></i> Range Matches</a>
+            <a href="/kmeans_results"><i class="bi bi-bar-chart-line-fill"></i> K-Means Clustering</a>
+            <a href="/plot"><i class="bi bi-graph-up"></i> Distribution Plot</a>
+            <a href="/input_data"><i class="bi bi-pencil-square"></i> Input Patient Data</a>
+            <a href="/mpv"><i class="bi bi-trophy"></i> MPV</a>
+        </div>
+        <footer>© 2048 Patient Matching System | Design by Tooplate</footer>
+    </div>
+
+    <!-- 内容区域 -->
+    <div class="content">
+        <div class="content-box">
+            <h1>Welcome to the Patient Matching System</h1>
+            <p>
+                Our system helps healthcare professionals find the most relevant matches 
+                for patient diagnosis and clustering analysis.
+            </p>
+            <p>
+                Use the navigation buttons on the left to explore the features of our platform.
+            </p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
+
